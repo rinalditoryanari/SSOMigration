@@ -1,0 +1,35 @@
+{
+  "name": "ssomigration",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "dev": "nodemon ./bin/www",
+    "build:css": "postcss public/stylesheets/tailwind.css -o public/stylesheets/style.css"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "dependencies": {
+    "@keycloak/keycloak-admin-client": "^22.0.1",
+    "@tailwindcss/forms": "^0.5.4",
+    "@tailwindcss/typography": "^0.5.9",
+    "autoprefixer": "^10.4.14",
+    "axios": "^1.6.2",
+    "change-case-all": "^2.1.0",
+    "cookie-parser": "~1.4.4",
+    "debug": "~4.3.4",
+    "dotenv": "^16.3.1",
+    "express": "~4.16.1",
+    "hbs": "~4.2.0",
+    "http-errors": "~1.6.3",
+    "md5": "^2.3.0",
+    "morgan": "~1.9.1",
+    "pg": "^8.11.3",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.35.2",
+    "tailwindcss": "^3.3.3",
+    "validator": "^13.11.0",
+    "versoly-ui": "^2.0.1"
+  }
+}

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <link rel="stylesheet" href="/stylesheets/style.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.js"></script>
+
+    <title>{{title}}</title>
+</head>
+<body>
+<div class="bg-secondary-100 flex flex-col items-center justify-center min-h-screen sm:py-16">
+    <div class="max-w-md space-y-6 w-full">
+        <div class="bg-white p-8 border-solid border bg-white rounded-lg space-y-6">
+            <header class="space-y-4">
+                <div class="md:flex mb-5">
+                    <div class="md:flex-shrink-0 my-auto">
+                        <img src="/images/pnj.svg" class="float-left" alt="Logo PNJ"
+                             height="70" width="75">
+                    </div>
+                    <div class="md:ml-6 my-auto">
+                        <h1 class="font-bold text-3xl font-bold">SSO</h1>
+                        <h1 class="text-xl">Politeknik Negeri Jakarta</h1>
+                    </div>
+                </div>
+                <h1 class="font-bold text-center text-xl">Migrasi akun Internet Anda ke SSO!</h1>
+            </header>
+            <main class="space-y-4">
+                {{{body}}}
+            </main>
+            <footer>
+                <p class="text-center text-gray-500 text-xs">
+                    SSO Migration Service &copy; 2023 - UPATIK
+                </p>
+            </footer>
+        </div>
+        <div class="flex justify-around">
+            <div class="relative" x-data="{open: false}">
+                <button class="inline-flex text-secondary-600 hover:text-secondary-900" @click="open = true"
+                        type="button">
+                    <div class="flex items-center">
+                        <span class="text-sm">English</span>
+                        <svg fill="none" height="1em" stroke="currentColor" viewBox="0 0 24 24" width="1em"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

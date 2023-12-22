@@ -1,0 +1,110 @@
+<div class="w-full">
+    <p class="text-center">Verifikasi Data Anda disini, Jika Anda melihat data yang tidak benar, mohon hubungi UPATIK</p>
+    {{#if error}}
+        <p class="text-center text-red-500">{{error}}</p>
+    {{/if}}
+    <form id="verify-user" action="/migration/migrate" method="POST">
+        <div class="mt-2">
+            <label for="ident" class="block text-sm font-medium leading-6 text-gray-900">NIM / NIP</label>
+            <div class="mt-1">
+                <input value="{{old_user.username}}" disabled id="ident" name="ident" type="text" class="block appearance-none w-full rounded-md border-0 py-1.5 text-gray-900 bg-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+            </div>
+        </div>
+
+        <div class="mt-2">
+            <label for="nama" class="block text-sm font-medium leading-6 text-gray-900">Nama</label>
+            <div class="mt-1">
+                <input value="{{old_user.nama}}" disabled id="nama" name="nama" type="text" class="block appearance-none w-full rounded-md border-0 py-1.5 text-gray-900 bg-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+            </div>
+        </div>
+
+        <div class="mt-2">
+            <label for="jurusan" class="block text-sm font-medium leading-6 text-gray-900">Jurusan/Unit</label>
+            <div class="mt-1">
+                <input value="{{old_user.jurusan}}" disabled id="nama" name="nama" type="text" class="block appearance-none w-full rounded-md border-0 py-1.5 text-gray-900 bg-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+            </div>
+        </div>
+
+        <p class="mt-5 mb-2 text-sm text-center">
+            Email dan Password yang akan digunakan untuk login ke SSO PNJ
+        </p>
+
+        <div class="mt-2">
+            <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email PNJ</label>
+            <div class="mt-1">
+                <input value="{{old_user.email_pnj}}" id="email" name="email" type="email" class="block appearance-none w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+            </div>
+            <p id="hide-email" class="hidden text-xs mt-0.5 italic text-red-400">Mohon masukkan email dengan akhiran domain @*.pnj.ac.id atau @pnj.ac.id</p>
+        </div>
+
+        <div class="mt-2">
+            <label for="password" class="block text-sm font-medium leading-6 text-gray-900">Password Baru SSO</label>
+            <div class="mt-1">
+                <input id="password" name="password" type="password" class="block appearance-none w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+            </div>
+            <p id="hide-password" class="hidden text-xs my-0.5 italic text-red-400">Password harus memiliki kriteria: min 10 karakter, 1 huruf besar, 1 huruf kecil, dan 1 angka</p>
+        </div>
+
+        <input type="hidden" name="hid_ident" value="{{old_user.username}}"/>
+        <input type="hidden" name="hid_password" value="{{old_password}}"/>
+
+        <div class="mt-5">
+            <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Submit</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const forms = document.getElementById('verify-user');
+    const password_input_box = document.getElementById('password');
+    const email_input_box = document.getElementById('email');
+
+    const verifyPassword = (password) => {
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{10,}$/;
+        return regex.test(password);
+    }
+
+    const verifyEmail = (email) => {
+        const regex = /\b[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)?pnj\.ac\.id\b/;
+        return regex.test(email);
+    }
+
+    const error_classes = ['ring-red-300', 'border-red-200', 'focus:ring-red-600' ,'bg-red-200'];
+
+    const giveErrorClasses = (element) => {
+        element.classList.add(...error_classes);
+    }
+    const removeErrorClasses = (element) => {
+        element.classList.remove(...error_classes);
+    }
+
+    email_input_box.addEventListener('input', (evt) =>{
+
+        if(verifyEmail(evt.target.value)){
+            document.getElementById('hide-email').classList.add('hidden');
+            giveErrorClasses(email_input_box);
+        }else{
+            document.getElementById('hide-email').classList.remove('hidden');
+            removeErrorClasses(email_input_box);
+        }
+
+    })
+
+    password_input_box.addEventListener('input', (evt) => {
+        if(verifyPassword(evt.target.value)){
+            document.getElementById('hide-password').classList.add('hidden');
+            giveErrorClasses(password_input_box);
+        }else{
+            document.getElementById('hide-password').classList.remove('hidden');
+            removeErrorClasses(password_input_box);
+        }
+    })
+
+    forms.addEventListener('submit', (evt) => {
+        const password = password_input_box.value;
+        evt.preventDefault();
+        if(verifyPassword(password) && verifyEmail(email_input_box.value)){
+            forms.submit();
+        }
+    });
+</script>
