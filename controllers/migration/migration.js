@@ -164,10 +164,15 @@ const migrateUser = async (req, res, next) => {
 
         kcGroupId = kcGroupAngkatan.id
     } else if (old_user.jabatan == 'dosen') {
-        //dosen
+        let kcGroupJurusan = await getSubGroup(kcGroupJabatan[0], old_user.jurusan)
+
+        kcGroupJurusan = await kcAdminClient.groups.findOne({briefRepresentation: true, id: kcGroupJurusan.id});
+        kcGroupId = kcGroupJurusan.id
     }
     {
         //staf
+        let kcGroupMigrasi = await getSubGroup(kcGroupJabatan[0], 'Data Migrasi')
+        kcGroupId = kcGroupMigrasi.id
     }
 
     const post = await postUser(old_user, email, password, kcGroupId)
