@@ -117,8 +117,7 @@ const postUser = async (old_user, email, password, kcGroupId) => {
 
     user = await kcAdminClient.users.create(user)
     console.log(user, user.id, user["id"])
-    user = user.id
-    const group = await kcAdminClient.users.addToGroup()
+    const group = await kcAdminClient.users.addToGroup({id: user.id, groupId: kcGroupId})
 
     return group;
     // } catch (e) {
@@ -168,8 +167,7 @@ const migrateUser = async (req, res, next) => {
 
         kcGroupJurusan = await kcAdminClient.groups.findOne({briefRepresentation: true, id: kcGroupJurusan.id});
         kcGroupId = kcGroupJurusan.id
-    }
-    {
+    } else {
         //staf
         let kcGroupMigrasi = await getSubGroup(kcGroupJabatan[0], 'Data Migrasi')
         kcGroupId = kcGroupMigrasi.id
