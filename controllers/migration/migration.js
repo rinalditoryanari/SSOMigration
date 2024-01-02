@@ -9,6 +9,7 @@ const initModels = require('../../model/initmodels');
 const {Op} = require('sequelize');
 const axios = require('axios');
 const {get} = require('axios');
+const authenticate = require("../../infrastructure/keycloak/keycloak");
 
 const models = initModels(sequelize);
 
@@ -73,40 +74,87 @@ const migrateUser = async (req, res, next) => {
         },
     });
 
-
-    /*
-        ambil nama sama jurusan, nip/nim dari old
-            sisanya dari form input
-        naamnya pake CapitalCase()
-        
-        Kalo dia mahasiswa -> 
-            harus ngambil 
-                tahun akademik dari api gateaway -> https://apitracer.upatik.io/mhs_tahun_akademik?nim=1907412028
-                {
-                    ...
-                    "th_akademik": 2019
-                }
-                nanti dia masuk ke /mahasiswa/'jurusan'/'th_akademik'
-
-        kalo dosen cuman ambil jurusan doang
-                nanti ke /dosen/jurusan
-
-        kalo staff langsung ke staf/data migrasi
-    */
-
-    const authenticate = require('../../infrastructure/keycloak/keycloak.js');
-
     // TODO: Check data at ACADEMIA / PERSONALIA
     const kcAdminClient = await authenticate;
 
-    // TODO: Submit data to Keycloak
-    const kcGroup = await kcAdminClient.groups.find({briefRepresentation: true, search: old_user.jurusan});
+    // Find The Keycloak Groups
+    const kcGroupJabatan = await kcAdminClient.groups.find({briefRepresentation: true, search: old_user.jabatan});
 
-    /*
-    nanti ini bagian lo nyari dkk dan bikin subgroups itu
-    
-    
-    */
+    if (old_user.jabatan == 'Mahasiswa') {
+        /*
+        * array find group mahasiswa -> subgroup jurusan
+        * findOne pakai subgroup.id
+        *   await kcAdminClient.groups.findOne({briefRepresentation: true, id: kcSubGroup.id})
+        * cari tahun akademik pakai api get
+        *   https://apitracer.upatik.io/mhs_tahun_akademik?nim=
+        * array find subgroup jurusan ->  angkatan
+        *
+        * kalau tidak ada
+        *   bikin object group
+        *   {
+            name: angkatan,
+            path: group jurusan.path / angkatam,
+            }
+        *
+        *   create group
+        *       pakai kcAdminClient.groups.setOrCreateChild({id: group jurusan.id}, object group);
+        *
+        * bikin object user
+        *   {
+                username: old_user.username,
+                email: email,
+                emailVerified: true,
+                enabled: true,
+                firstName: firstName,
+                lastName: lastName,
+            }
+        *create user ->  await kcAdminClient.users.create(user)
+        *add user to group -> await kcAdminClient.users.addToGroup({id: user.id, groupId: group Id})
+        * */
+    } else if (old_user.jabatan == 'dosen') {
+
+        /*
+        * array find group group -> subgroup jurusan
+        * findOne pakai subgroup.id
+        *   await kcAdminClient.groups.findOne({briefRepresentation: true, id: kcSubGroup.id})
+
+        * bikin object user
+        *   {
+                username: old_user.username,
+                email: email,
+                emailVerified: true,
+                enabled: true,
+                firstName: firstName,
+                lastName: lastName,
+            }
+        *create user ->  await kcAdminClient.users.create(user)
+        *add user to group -> await kcAdminClient.users.addToGroup({id: user.id, groupId: group Id})
+        * */
+    } else {
+        //staf
+
+
+        /*
+        * array find group staff -> subgroup jurusan -> cari "Data Migrasi"
+        * findOne pakai subgroup.id
+        *   await kcAdminClient.groups.findOne({briefRepresentation: true, id: kcSubGroup.id})
+
+        * bikin object user
+        *   {
+                username: old_user.username,
+                email: email,
+                emailVerified: true,
+                enabled: true,
+                firstName: firstName,
+                lastName: lastName,
+            }
+        *create user ->  await kcAdminClient.users.create(user)
+        *add user to group -> await kcAdminClient.users.addToGroup({id: user.id, groupId: kcGroupId})
+        * */
+
+    }
+
+    // sampai sini aja dulu
 };
 
 module.exports = {
