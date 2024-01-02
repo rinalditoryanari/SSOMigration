@@ -1,14 +1,14 @@
 const validator = require('validator');
-const { User } = require('../../model/users');
+const {User} = require('../../model/users');
 const md5 = require('md5');
 
-const { capitalCase } = require('change-case-all');
+const {capitalCase} = require('change-case-all');
 
 const sequelize = require('../../infrastructure/db/sequelize');
 const initModels = require('../../model/initmodels');
-const { Op } = require('sequelize');
+const {Op} = require('sequelize');
 const axios = require('axios');
-const { get } = require('axios');
+const {get} = require('axios');
 
 const models = initModels(sequelize);
 
@@ -20,20 +20,20 @@ const showMigrationForm = (req, res, next) => {
         message = 'Username atau password salah';
     }
 
-    res.render('migration-form', { title: 'Migrasi SSO', error: message });
+    res.render('migration-form', {title: 'Migrasi SSO', error: message});
 };
 
 // Ajax Function to verify user and password from the old internet database
 
 const checkUser = async (req, res, next) => {
-    const { ident, password } = req.body;
+    const {ident, password} = req.body;
 
     if (!validator.isNumeric(ident)) {
-        return res.redirect(301, '/migration-form?error=empty');
+        return res.redirect(401, '/migration-form?error=empty');
     }
 
     if (validator.isEmpty(password)) {
-        return res.redirect(301, '/migration-form?error=empty');
+        return res.redirect(401, '/migration-form?error=empty');
     }
 
     //Check for existing user and password in the old internet database
@@ -50,23 +50,21 @@ const checkUser = async (req, res, next) => {
 
     old_user.nama = capitalCase(old_user.nama);
 
-    res.render('verify', { title: 'Migrasi SSO', old_user: old_user, old_password: password });
+    res.render('verify', {title: 'Migrasi SSO', old_user: old_user, old_password: password});
 };
 
 const migrateUser = async (req, res, next) => {
-    const { hid_ident, hid_password } = req.body;
+    const {email, password, hid_ident, hid_password} = req.body;
 
-    /*
-    ambil input dari req.body baru 
-    validasi server side
-    - copy function verify yang ada di client side - di verify.hbs
-        dibikin modelan kayak function show migrationForm pake if else dkk
-        error nya nanti dikasih message
+    let regex = /\b[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)?pnj\.ac\.id\b/;
+    if (!regex.test(email)) {
+        return res.redirect(401, '/migration-form?error=Pastikan mengisi Email dengan benar!');
+    }
 
-    - abis itu kalo kgk ke veirfy langsung di trhow ke /migration
-        return res.redirect(301, '/migration-form?error=empty');
-        error message nya taro di param error
-    */
+    regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{10,}$/;
+    if (!regex.test(password)) {
+        return res.redirect(401, '/migration-form?error=Pastikan mengisi Password dengan benar!');
+    }
 
     const old_user = await models.users.findOne({
         where: {
@@ -74,6 +72,7 @@ const migrateUser = async (req, res, next) => {
             password: md5(hid_password),
         },
     });
+
 
     /*
         ambil nama sama jurusan, nip/nim dari old
@@ -101,7 +100,7 @@ const migrateUser = async (req, res, next) => {
     const kcAdminClient = await authenticate;
 
     // TODO: Submit data to Keycloak
-    const kcGroup = await kcAdminClient.groups.find({ briefRepresentation: true, search: old_user.jurusan });
+    const kcGroup = await kcAdminClient.groups.find({briefRepresentation: true, search: old_user.jurusan});
 
     /*
     nanti ini bagian lo nyari dkk dan bikin subgroups itu
