@@ -81,6 +81,40 @@ const migrateUser = async (req, res, next) => {
     const kcGroupJabatan = await kcAdminClient.groups.find({briefRepresentation: true, search: old_user.jabatan});
 
     if (old_user.jabatan == 'Mahasiswa') {
+
+        let kcMahasiswaGroup = array.find(group => group.name === 'mahasiswa');
+        let kcSubGroup = kcMahasiswaGroup.subgroups.find(subgroup => subgroup.name === 'jurusan')
+
+        await kcAdminClient.groups.findOne({briefRepresentation: true, id: kcSubGroup.id})
+
+        let response = await fetch('https://apitracer.upatik.io/mhs_tahun_akademik?nim=' + old_user.username);
+        let data = await response.json();
+        let tahun_akademik = data['th_akademik'];
+        console.log(tahun_akademik)
+
+        let kcAngkatanSubgroup = kcSubGroup.subgroups.find(subgroup => subgroup.name === tahun_akademik);
+
+        if (!kcAngkatanSubgroup) {
+            let newGroup = {
+                name: tahun_akademik,
+                path: kcSubGroup.path + '/' + tahun_akademik,
+            };
+        
+            await kcAdminClient.groups.setOrCreateChild({id: kcSubGroup.id}, newGroup);
+        }
+        
+        const user = {
+            username: old_user.username,
+            email: email,
+            emailVerified: true,
+            enabled: true,
+            firstName: firstName,
+            lastName: lastName,
+        }
+
+        let kcCreateUser = await kcAdminClient.users.create(user)
+        await kcAdminClient.users.addToGroup({id: kcCreateUser.id, groupId: groupId});
+
         /*
         * array find group mahasiswa -> subgroup jurusan
         * findOne pakai subgroup.id
