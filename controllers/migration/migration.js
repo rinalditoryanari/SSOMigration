@@ -10,6 +10,7 @@ const {Op} = require('sequelize');
 const axios = require('axios');
 const {get} = require('axios');
 const authenticate = require("../../infrastructure/keycloak/keycloak");
+const { application, response } = require('express');
 
 const models = initModels(sequelize);
 
@@ -78,9 +79,34 @@ const migrateUser = async (req, res, next) => {
     const kcAdminClient = await authenticate;
 
     // Find The Keycloak Groups
-    const kcGroupJabatan = await kcAdminClient.groups.find({briefRepresentation: true, search: old_user.jabatan});
+    const kcGroupJabatan = await kcAdminClient.groups.find({
+        briefRepresentation: true, 
+        search: old_user.jabatan
+    });
 
     if (old_user.jabatan == 'Mahasiswa') {
+
+        // const subGroup = await kcGroupJabatan.subGroups.findOne({
+        //     briefRepresentation: true,
+        //     search
+        // });
+
+        // GET informasi mahasiswa from apitracer
+        const apiMahasiswaURL = 'https://apitracer.upatik.io/mhs_tahun_akademik';
+        const responseMahasiswa = await axios.get(apiMahasiswaURL, {
+            params: {
+                nim: old_user.username
+            }
+        });
+
+        // ambil tahun angkatan
+        const tahunAngkatan = responseMahasiswa.data['th_akademik'];
+
+        console.log(responseMahasiswa.data);
+        console.log(responseMahasiswa.data['th_angkatan']);
+
+        res.json(responseMahasiswa);
+        
         /*
         * array find group mahasiswa -> subgroup jurusan
         * findOne pakai subgroup.id
@@ -154,6 +180,7 @@ const migrateUser = async (req, res, next) => {
 
     }
 
+    
     // sampai sini aja dulu
 };
 
