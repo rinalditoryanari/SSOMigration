@@ -86,10 +86,12 @@ const migrateUser = async (req, res, next) => {
 
     if (old_user.jabatan == 'Mahasiswa') {
 
-        // const subGroup = await kcGroupJabatan.subGroups.findOne({
-        //     briefRepresentation: true,
-        //     search
-        // });
+        const subGroup = await kcGroupJabatan.subGroups.findOne({
+            briefRepresentation: true,
+            search: old_user.jurusan
+        });
+
+        
 
         // GET informasi mahasiswa from apitracer
         const apiMahasiswaURL = 'https://apitracer.upatik.io/mhs_tahun_akademik';
@@ -105,7 +107,7 @@ const migrateUser = async (req, res, next) => {
         console.log(responseMahasiswa.data);
         console.log(responseMahasiswa.data['th_angkatan']);
 
-        res.json(responseMahasiswa);
+        res.json(subGroup);
         
         /*
         * array find group mahasiswa -> subgroup jurusan
