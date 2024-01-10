@@ -82,20 +82,20 @@ const migrateUser = async (req, res, next) => {
 
     if (old_user.jabatan == 'Mahasiswa') {
 
-        let kcMahasiswaGroup = array.find(group => group.name === 'mahasiswa');
-        let kcSubGroup = kcMahasiswaGroup.subgroups.find(subgroup => subgroup.name === 'jurusan')
+        const kcMahasiswaGroup = array.find(group => group.name === 'mahasiswa');
+        const kcSubGroup = kcMahasiswaGroup.subgroups.find(subgroup => subgroup.name === 'jurusan')
 
         await kcAdminClient.groups.findOne({briefRepresentation: true, id: kcSubGroup.id})
 
-        let response = await fetch('https://apitracer.upatik.io/mhs_tahun_akademik?nim=' + old_user.username);
-        let data = await response.json();
-        let tahun_akademik = data['th_akademik'];
+        const response = await fetch('https://apitracer.upatik.io/mhs_tahun_akademik?nim=' + old_user.username);
+        const data = await response.json();
+        const tahun_akademik = data['th_akademik'];
         console.log(tahun_akademik)
 
-        let kcAngkatanSubgroup = kcSubGroup.subgroups.find(subgroup => subgroup.name === tahun_akademik);
+        const kcAngkatanSubgroup = kcSubGroup.subgroups.find(subgroup => subgroup.name === tahun_akademik);
 
         if (!kcAngkatanSubgroup) {
-            let newGroup = {
+            const newGroup = {
                 name: tahun_akademik,
                 path: kcSubGroup.path + '/' + tahun_akademik,
             };
@@ -112,7 +112,7 @@ const migrateUser = async (req, res, next) => {
             lastName: lastName,
         }
 
-        let kcCreateUser = await kcAdminClient.users.create(user)
+        const kcCreateUser = await kcAdminClient.users.create(user)
         await kcAdminClient.users.addToGroup({id: kcCreateUser.id, groupId: groupId});
 
         /*
