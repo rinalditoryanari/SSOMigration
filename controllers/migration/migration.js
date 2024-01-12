@@ -115,18 +115,21 @@ const migrateUser = async (req, res, next) => {
         // ambil tahun angkatan
         const tahunAngkatan = responseMahasiswa.data['th_akademik'];
         // search group angkatan
-        let kcGroupAngkatan = await kcAdminClient.groups.find({
+        
+        const kcGroupMahasiswa = await kcAdminClient.groups.find({
             briefRepresentation: true,
             search: tahunAngkatan,
         });
 
+        let kcGroupAngkatan = kcGroupMahasiswa[0].subGroups[0].subGroups[0];
+
         // check angkatan group if existed
-        if (kcGroupAngkatan.length != 0) {
+        if (kcGroupAngkatan != null) {
 
             // add user to group
             await kcAdminClient.users.addToGroup({
                 id: kcUser.id,
-                groupId: kcGroupAngkatan[0].id,
+                groupId: kcGroupAngkatan.id,
             });
 
         } else {
@@ -148,8 +151,8 @@ const migrateUser = async (req, res, next) => {
             });
         }
 
-        
-        res.json(kcUser);        
+        res.json(kcGroupAngkatan);
+      
         /*
         * array find group mahasiswa -> subgroup jurusan
         * findOne pakai subgroup.id
