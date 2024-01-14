@@ -81,6 +81,69 @@ const migrateUser = async (req, res, next) => {
     const kcGroupJabatan = await kcAdminClient.groups.find({briefRepresentation: true, search: old_user.jabatan});
 
     if (old_user.jabatan == 'Mahasiswa') {
+
+        // create new user object
+        const kcUser = await kcAdminClient.users.create({
+            username: old_user.username,
+            email: email,
+            firstName: firstName,
+            lastName: lastName,
+            emailVerified: true,
+            enabled: true,
+        });
+
+        // ambil subgroup jurusan
+        const kcSubGroupJurusan = kcGroupJabatan[0].subGroups[0];
+
+        // GET informasi mahasiswa from apitracer
+        const apiMahasiswaURL = 'https://apitracer.upatik.io/mhs_tahun_akademik';
+        const responseMahasiswa = await axios.get(apiMahasiswaURL, {
+            params: {
+                nim: old_user.username
+            }
+        });
+
+        // ambil tahun angkatan
+        const tahunAngkatan = responseMahasiswa.data['th_akademik'];
+
+        // search group angkatan
+        const kcGroupJurusan = await kcAdminClient.groups.findOne({
+            id: kcSubGroupJurusan.id
+        });
+
+        let kcGroupAngkatan = kcGroupJurusan.subGroups.find(
+            (angkatan) => angkatan.name == tahunAngkatan
+        );
+
+        // check angkatan group if existed
+        if (kcGroupAngkatan != null) {
+
+            // add user to group
+            await kcAdminClient.users.addToGroup({
+                id: kcUser.id,
+                groupId: kcGroupAngkatan.id,
+            });
+
+        } else {
+            //  create new angkatan group
+            kcGroupAngkatan = await kcAdminClient.groups.setOrCreateChild(
+                {
+                    id: kcSubGroupJurusan.id,
+                },
+                {
+                    name: tahunAngkatan,
+                    path: kcSubGroupJurusan.path + "/" + tahunAngkatan,
+                }
+            );
+
+            // add user to group
+            await kcAdminClient.users.addToGroup({
+                id: kcUser.id, 
+                groupId: kcGroupAngkatan.id,
+            });
+        }
+
+        res.json(kcGroupAngkatan);
         /*
         * array find group mahasiswa -> subgroup jurusan
         * findOne pakai subgroup.id
