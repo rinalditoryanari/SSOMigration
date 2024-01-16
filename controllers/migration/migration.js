@@ -70,7 +70,6 @@ const migrateUser = async (req, res, next) => {
 			password: md5(hid_password),
 		},
 	});
-	old_user.jabatan = 'Staf'
 
 	// TODO: Check data at ACADEMIA / PERSONALIA
 	const kcAdminClient = await authenticate;
