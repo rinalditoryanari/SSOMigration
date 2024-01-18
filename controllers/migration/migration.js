@@ -6,7 +6,6 @@ const { capitalCase } = require('change-case-all');
 const sequelize = require('../../infrastructure/db/sequelize');
 const initModels = require('../../model/initmodels');
 const axios = require('axios');
-const { get } = require('axios');
 const authenticate = require('../../infrastructure/keycloak/keycloak');
 
 const models = initModels(sequelize);
@@ -88,9 +87,9 @@ const migrateUser = async (req, res, next) => {
 
     let kcSubGroup;
 
-    if (old_user.jabatan == 'Mahasiswa') {
+    if (old_user.jabatan === 'Mahasiswa') {
         // ambil subgroup jurusan
-        let kcGroupJurusan = kcGroupJabatan.subGroups.find((jurusan) => jurusan.name == old_user.jurusan);
+        let kcGroupJurusan = kcGroupJabatan.subGroups.find((jurusan) => jurusan.name === old_user.jurusan);
         kcGroupJurusan = await kcAdminClient.groups.findOne({
             id: kcGroupJurusan.id,
         });
@@ -105,7 +104,7 @@ const migrateUser = async (req, res, next) => {
 
         // ambil tahun angkatan
         let kcGroupAngkatan = responseMahasiswa.data['th_akademik'];
-        kcGroupAngkatan = kcGroupJurusan.subGroups.find((angkatan) => angkatan.name == kcGroupAngkatan);
+        kcGroupAngkatan = kcGroupJurusan.subGroups.find((angkatan) => angkatan.name === kcGroupAngkatan);
 
         // check angkatan group if existed
         if (kcGroupAngkatan == null) {
@@ -122,12 +121,12 @@ const migrateUser = async (req, res, next) => {
         }
 
         kcSubGroup = kcGroupAngkatan;
-    } else if (old_user.jabatan == 'dosen') {
+    } else if (old_user.jabatan === 'dosen') {
         //dosen
-        kcSubGroup = kcGroupJabatan.subGroups.find((subgroup) => subgroup.name == old_user.jurusan);
+        kcSubGroup = kcGroupJabatan.subGroups.find((subgroup) => subgroup.name === old_user.jurusan);
     } else {
         //staff
-        kcSubGroup = kcGroupJabatan.subGroups.find((subgroup) => subgroup.name == 'Data Migrasi');
+        kcSubGroup = kcGroupJabatan.subGroups.find((subgroup) => subgroup.name === 'Data Migrasi');
     }
     //Buat user baru
     const kcUser = await kcAdminClient.users.create({
