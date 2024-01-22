@@ -1,7 +1,7 @@
 const validator = require('validator');
 const md5 = require('md5');
 
-const { capitalCase } = require('change-case-all');
+const {capitalCase} = require('change-case-all');
 
 const sequelize = require('../../infrastructure/db/sequelize');
 const initModels = require('../../model/initmodels');
@@ -18,13 +18,13 @@ const showMigrationForm = (req, res, next) => {
         message = 'Username atau password salah';
     }
 
-    res.render('migration-form', { title: 'Migrasi SSO', error: message });
+    res.render('migration-form', {title: 'Migrasi SSO', error: message});
 };
 
 // Ajax Function to verify user and password from the old internet database
 
 const checkUser = async (req, res, next) => {
-    const { ident, password } = req.body;
+    const {ident, password} = req.body;
 
     if (!validator.isNumeric(ident)) {
         return res.redirect(401, '/migration-form?error=empty');
@@ -48,11 +48,11 @@ const checkUser = async (req, res, next) => {
 
     old_user.nama = capitalCase(old_user.nama);
 
-    res.render('verify', { title: 'Migrasi SSO', old_user: old_user, old_password: password });
+    res.render('verify', {title: 'Migrasi SSO', old_user: old_user, old_password: password});
 };
 
 const migrateUser = async (req, res, next) => {
-    const { email, password, hid_ident, hid_password } = req.body;
+    const {email, password, hid_ident, hid_password} = req.body;
 
     let regex = /\b[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)?pnj\.ac\.id\b/;
     if (!regex.test(email)) {
@@ -75,9 +75,14 @@ const migrateUser = async (req, res, next) => {
     const kcAdminClient = await authenticate;
 
     // Find The Keycloak Groups
-    const kcGroupJabatan = await kcAdminClient.groups.find({
+    let kcGroupJabatan = await kcAdminClient.groups.find({
         briefRepresentation: true,
         search: old_user.jabatan,
+    });
+    kcGroupJabatan = kcGroupJabatan.find((group) => group.name == old_user.jabatan);
+    kcGroupJabatan = await kcAdminClient.groups.findOne({
+        briefRepresentation: true,
+        id: kcGroupJabatan.id,
     });
 
     // Split name to firstName and lastName
@@ -121,7 +126,7 @@ const migrateUser = async (req, res, next) => {
         }
 
         kcSubGroup = kcGroupAngkatan;
-    } else if (old_user.jabatan === 'dosen') {
+    } else if (old_user.jabatan === 'Dosen') {
         //dosen
         kcSubGroup = kcGroupJabatan.subGroups.find((subgroup) => subgroup.name === old_user.jurusan);
     } else {
